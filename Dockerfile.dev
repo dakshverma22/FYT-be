@@ -1,0 +1,14 @@
+FROM node:18
+ARG HOST_USER_UID=1000
+ARG HOST_USER_GID=1000
+ARG nodeEnv=development
+ENV NODE_ENV=$nodeEnv
+RUN npm install -g pm2 
+WORKDIR /home/node/
+COPY ./package.json ./yarn.lock ./
+RUN yarn
+COPY . .
+RUN groupmod -g $HOST_USER_GID node && usermod -u $HOST_USER_UID -g $HOST_USER_GID node
+RUN rm -rf log && mkdir log && chown node:node log -R
+USER node
+CMD ["yarn", "start:dev"]
